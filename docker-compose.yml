@@ -1,0 +1,24 @@
+version: '3'
+services:
+  # Create frontend container
+  frontend: # Name of our service
+    image: registry.gitlab.com/cast.nasa/nasa-tooling/nasa-crm/nasa-crm-front:latest # path to dockerfile
+    environment:
+      - CI_REGISTRY_USER=watkinscast
+      - CI_REGISTRY_PASSWORD=EBC2q2gKYOAmWBeJtm6n
+    ports: # Port binding to host from docker container
+      - "80:80"
+    container_name: nasa-crm-front
+    restart: always # What to do if container crashes
+  # Create backend container
+  backend:
+    # Create backend container  
+    image: registry.gitlab.com/cast.nasa/nasa-tooling/nasa-crm/nasa-crm-back:latest # path to dockerfile
+    environment:
+      - DATABASE_URL=postgresql://operator:CastAIP@labanalysis01.corp.castsoftware.com:2284/postgres?schema=olympus
+      - CI_REGISTRY_USER=watkinscast
+      - CI_REGISTRY_PASSWORD=EBC2q2gKYOAmWBeJtm6n
+    ports:
+      - "443:443"
+    container_name: nasa-crm-back
+    restart: always

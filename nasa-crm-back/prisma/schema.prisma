@@ -1,0 +1,284 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  //url      = "postgresql://operator:CastAIP@localhost:2284/postgres?schema=olympusV2"
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model consultant {
+  consultant_id            Int                        @id @default(autoincrement())
+  name                     String?                    @db.VarChar(255)
+  trigram                  String?                    @db.VarChar(255)
+  email                    String?                    @db.VarChar(255)
+  active                   Boolean?                   @default(true)
+  emailnotification        Boolean?                   @default(true)
+  pivot_project_conxsultant pivot_project_consultant[]
+  train                    train[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model analyzed_file {
+  application_code String?   @db.VarChar(255)
+  analysis_date    DateTime? @db.Timestamp(6)
+  file_name        String?   @db.VarChar(255)
+  file_fullname    String?   @db.VarChar(255)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model application {
+  application_id             Int       @default(autoincrement())
+  application_name           String    @db.VarChar(255)
+  application_guid           String?   @db.VarChar(255)
+  active                     Boolean?
+  deployed                   Boolean?
+  application_code           String?   @db.VarChar(255)
+  application_path           String?   @db.VarChar(255)
+  rerun                      Boolean?  @default(true)
+  train_id                   Int?      @default(0)
+  inprocess                  Boolean?  @default(false)
+  lastanalysis_end_date      DateTime? @db.Timestamp(6)
+  lastanalysis_starting_date DateTime? @db.Timestamp(6)
+  creation_date              DateTime? @db.Timestamp(6)
+  flagneedarerun             Boolean?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model application_log {
+  application_code String?
+  log_file_path    String?
+  level            String?
+  text             String?
+  creation_date    DateTime? @db.Timestamp(6)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model application_objtyp {
+  applicationcode  String? @db.VarChar(255)
+  objtyp           String? @db.VarChar(255)
+  numberof         Int?
+  internaltypename String? @db.VarChar(255)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model profiler_information {
+  application_code       String?  @db.VarChar(255)
+  comp_language          String?  @db.VarChar(255)
+  comp_nb_loc            Int?
+  comp_nb_bytes          Int?
+  comp_nb_files          Int?
+  comp_type              String?  @db.VarChar(255)
+  comp_isbinary          Boolean?
+  comp_extension         String?  @db.VarChar(255)
+  comp_primary_extension String?  @db.VarChar(255)
+  train_id               Int?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model project {
+  project_id               Int                        @id @default(autoincrement())
+  client_name              String?                    @db.VarChar(255)
+  consultant_id            Int?
+  start_date               DateTime?                  @db.Date
+  due_date                 DateTime?                  @db.Date
+  description              String?                    @db.VarChar(4096)
+  hubspot_deal             String?                    @db.VarChar(255)
+  app_number_poc           Int?
+  app_number_goal          Int?
+  sow                      Boolean?
+  funding                  String?                    @db.VarChar(255)
+  expected_tech            String?                    @db.VarChar(255)
+  teams_channel            String?                    @db.VarChar(255)
+  infrastructure           String?                    @db.VarChar(255)
+  stage_id                 Int                        @default(19)
+  highlight                Boolean?
+  imaging                  Boolean?
+  client_id                Int?
+  deal_size                String?
+  infraconfig              infraconfig[]
+  pivot_project_consultant pivot_project_consultant[]
+  pivot_project_tag        pivot_project_tag[]
+  client                   client?                    @relation(fields: [client_id], references: [client_id], onDelete: NoAction, onUpdate: NoAction, map: "client")
+  train                    train[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model server_setup {
+  server_property String @db.VarChar(255)
+  value           String @db.VarChar(255)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model stage {
+  stage_id       Int     @id @default(autoincrement())
+  name           String  @db.VarChar(255)
+  active         Boolean @default(true)
+  context        String  @db.VarChar(255)
+  executionorder Int
+  display        Boolean
+  description    String? @db.VarChar(255)
+}
+
+model pivot_tag {
+  pivot_tag_id Int   @id @default(autoincrement())
+  tag_id       Int
+  train_id     Int
+  tag          tag   @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "tag")
+  traintracker train @relation(fields: [train_id], references: [train_id], onDelete: Cascade, onUpdate: NoAction, map: "train")
+}
+
+model tag {
+  tag_id            Int                 @id @default(autoincrement())
+  name              String?             @db.VarChar(255)
+  filename          String?             @db.VarChar(255)
+  color             String?             @db.VarChar(10)
+  type              String?             @db.VarChar(255)
+  pivot_project_tag pivot_project_tag[]
+  pivot_tag         pivot_tag[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model belongto {
+  parent String? @db.VarChar(255)
+  child  String? @db.VarChar(255)
+
+  @@ignore
+}
+
+model pivot_project_tag {
+  pivot_project_tag_id Int     @id @default(autoincrement())
+  project_id           Int
+  tag_id               Int
+  project              project @relation(fields: [project_id], references: [project_id], onDelete: Cascade, onUpdate: NoAction, map: "project")
+  tag                  tag     @relation(fields: [tag_id], references: [tag_id], onDelete: NoAction, onUpdate: NoAction, map: "tag")
+
+  @@index([project_id], map: "fki_project")
+}
+
+model client {
+  client_id   Int       @id @default(autoincrement())
+  name        String?   @db.VarChar(255)
+  infocast_id Int?
+  project     project[]
+}
+
+model pivot_sale_client {
+  pivot_sale_client_id Int  @id @default(autoincrement())
+  client_id            Int?
+  sale_id              Int?
+}
+
+model sale {
+  sale_id Int     @id @default(autoincrement())
+  name    String? @db.VarChar(255)
+  trigram String? @db.VarChar(3)
+  email   String? @db.VarChar(255)
+}
+
+model pivot_project_consultant {
+  pivot_project_consultant_id Int        @id @default(autoincrement())
+  project_id                  Int
+  consultant_id               Int
+  consultant                  consultant @relation(fields: [consultant_id], references: [consultant_id], onDelete: Cascade, onUpdate: NoAction, map: "consultant")
+  project                     project    @relation(fields: [project_id], references: [project_id], onDelete: Cascade, onUpdate: NoAction, map: "project")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model profiler_framework_information {
+  application_code String? @db.VarChar(255)
+  framework_type   String? @db.VarChar(255)
+  framework_name   String? @db.VarChar(255)
+  train_id         Int?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model profiler_graphviz {
+  application_code String? @db.VarChar(255)
+  graphviz         String?
+  train_id         Int?
+
+  @@ignore
+}
+
+model infraconfig {
+  infraconfig_id      Int      @id @default(autoincrement())
+  highlighturl        String?  @db.VarChar(255)
+  highlightlogin      String?  @db.VarChar(255)
+  highlightpassword   String?  @db.VarChar(255)
+  neo4jlogin          String?  @db.VarChar(255)
+  neo4jpassword       String?  @db.VarChar(255)
+  aiprestserver       String?  @db.VarChar(255)
+  aiprestlogin        String?  @db.VarChar(255)
+  aiprestpassword     String?  @db.VarChar(255)
+  postgreslogin       String?  @db.VarChar(255)
+  postgrespassword    String?  @db.VarChar(255)
+  imagingrestlogin    String?  @db.VarChar(255)
+  imagingrestpassword String?  @db.VarChar(255)
+  project_id          Int?
+  neo4jserver         String?  @db.VarChar(255)
+  postgresserver      String?  @db.VarChar(255)
+  imagingrestserver   String?  @db.VarChar(255)
+  vm_url              String?
+  neo4jport           Int?
+  postgresport        Int?
+  imagingrestport     Int?
+  aiprestport         Int?
+  highlightinstance   Int?
+  project             project? @relation(fields: [project_id], references: [project_id], onDelete: Cascade, onUpdate: NoAction, map: "project_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model sourcecode {
+  sourcecode_id    Int       @default(autoincrement())
+  originefilename  String?   @db.VarChar(255)
+  filename         String?   @db.VarChar(255)
+  fileextension    String?   @db.VarChar(255)
+  fileoriginpath   String?   @db.VarChar(255)
+  filecurrentpath  String?   @db.VarChar(255)
+  filecreationdate DateTime? @default(dbgenerated("CURRENT_DATE")) @db.Timestamp(6)
+
+  @@ignore
+}
+
+model train {
+  train_id                Int         @id @default(autoincrement())
+  sourcecode_id           Int?
+  application_code        String?     @db.VarChar(255)
+  application_name        String?     @db.VarChar(255)
+  application_displayname String?     @db.VarChar(255)
+  project_id              Int?
+  consultant_id           Int?
+  stage_id                Int         @default(2)
+  creationdate            DateTime?   @default(dbgenerated("CURRENT_DATE")) @db.Timestamp(6)
+  comment                 String?     @db.VarChar(255)
+  portfolio               Boolean?    @default(false)
+  runningflag             Int?        @default(0)
+  pivot_tag               pivot_tag[]
+  consultant              consultant? @relation(fields: [consultant_id], references: [consultant_id], onDelete: NoAction, onUpdate: NoAction, map: "consultant")
+  project                 project?    @relation(fields: [project_id], references: [project_id], onUpdate: NoAction, map: "project")
+}
+
+model trainlog {
+  task_id         Int       @id @default(autoincrement())
+  train_id        String?   @db.VarChar(255)
+  task_type       String?   @db.VarChar(255)
+  task_start_date DateTime? @db.Timestamp(6)
+  task_end_date   DateTime? @db.Timestamp(6)
+}

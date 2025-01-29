@@ -1,0 +1,43 @@
+# Official docker image.
+variables:
+  IMAGE_TAG: "1.$CI_JOB_ID"
+image:
+  name: docker:latest
+
+services:
+  - docker:dind
+
+before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+build_front:
+  stage: build
+  script:
+    - docker build --build-arg VITE_BACKEND_URL=${VITE_BACKEND_URL} -t $CI_REGISTRY_IMAGE/nasa-crm-front ./nasa-crm-front 
+    - docker push $CI_REGISTRY_IMAGE/nasa-crm-front
+  only:
+    - main
+    
+build_front_local:
+  stage: build
+  script:
+    - docker build --build-arg VITE_BACKEND_URL=http://localhost:443 -t $CI_REGISTRY_IMAGE/nasa-crm-front_local ./nasa-crm-front 
+    - docker push $CI_REGISTRY_IMAGE/nasa-crm-front_local
+  only:
+    - dev-local
+
+build_back:
+  stage: build
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/nasa-crm-back ./nasa-crm-back
+    - docker push $CI_REGISTRY_IMAGE/nasa-crm-back
+  only:
+    - main
+
+build_back_local:
+  stage: build
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/nasa-crm-back_local ./nasa-crm-back
+    - docker push $CI_REGISTRY_IMAGE/nasa-crm-back_local
+  only:
+    - dev-local

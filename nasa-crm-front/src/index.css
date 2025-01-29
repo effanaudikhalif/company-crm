@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.table-hover tbody tr:hover {
+    background-color: #313131;  /* Example color */
+  }
+  
+  .table th, .table td {
+    width: 25%; /* Adjust the percentage based on your needs */
+    color: white;
+  }
+  
+  .table {
+    width: 100%; /* Ensure the table width is full */
+    table-layout: fixed;
+  }
+  
+  .table th, .table td {
+    text-align: center; /* or right, center based on your needs */
+  }
+  
+  .table th, .table td {
+    padding: 8px; /* Adjust padding for spacing */
+    margin: 0;
+  }
